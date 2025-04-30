@@ -2,6 +2,7 @@
 
 import {ReactNode, memo, useCallback, useEffect, useState} from 'react';
 import './App.css';
+import axios from 'axios';
 
 interface IPost {
 	userId: number;
@@ -17,10 +18,10 @@ function App() {
 	const getPosts = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const response = await fetch(
+			const response = await axios.get(
 				"https://jsonplaceholder.typicode.com/posts"
 			);
-			const newPosts = await response.json();
+			const newPosts = await response.data;
 			setPosts(newPosts as unknown as IPost[]);
 			setIsLoading(false);
 		} catch (error) {
