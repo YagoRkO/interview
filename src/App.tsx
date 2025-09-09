@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import {ReactNode, memo, useCallback, useEffect, useState} from 'react';
+import {ReactNode, Suspense, memo, useCallback, useEffect, useState} from 'react';
 import './App.css';
 import axios from 'axios';
 
@@ -21,13 +21,17 @@ function App() {
 			const response = await axios.get(
 				"https://jsonplaceholder.typicode.com/posts"
 			);
-			const newPosts = await response.data;
+			const newPosts = response.data;
 			setPosts(newPosts as unknown as IPost[]);
 			setIsLoading(false);
 		} catch (error) {
 			console.log(error);
 		}
 	}, []);
+
+	const refetchPosts = async () => {
+		await getPosts();
+	};
 
 	useEffect(() => {
 		getPosts();
@@ -39,9 +43,12 @@ function App() {
 
 	return (
 		<div className='app'>
-			{posts.map((post, i) => (
-				<Post post={post} key={i} />
-			))}
+			<Suspense fallback={<div>Посты загружаются</div>}>
+				{posts.map((post, i) => (
+					<Post post={post} key={i} />
+				))}
+				<Button onClick={refetchPosts}>Обновить посты</Button>
+			</Suspense>
 		</div>
 	);
 }
@@ -73,10 +80,12 @@ const Post = memo(({post}: {post: IPost}) => {
 	);
 });
 
-const Button = ({icon, onClick}: {icon: ReactNode, onClick: () => void}) => (
+
+//Базовый компонент кнопки, считать за имплементацию дефолтного html тега button
+const Button = memo(({icon, onClick}: {icon?: ReactNode, onClick: React.MouseEventHandler<HTMLButtonElement>}) => (
 	<button className="button" onClick={onClick}>
 		{icon}
 	</button>
-);
+));
 
 export default App;
